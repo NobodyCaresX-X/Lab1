@@ -50,14 +50,17 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
-      # 提取 Docker 元数据（自动处理小写转换）
+      # 提取 Docker 元数据（自动处理小写转换 + 多版本标签）
       - name: Extract metadata for Docker
         id: meta
         uses: docker/metadata-action@v5
         with:
           images: ghcr.io/${{ github.repository }}
           tags: |
+            # 始终标记为 latest（方便快速部署最新版）
             type=raw,value=latest
+            # 使用 Git Commit SHA 前7位作为唯一版本标识（支持版本回滚）
+            type=sha,prefix=,format=short
 
       # 构建并推送
       - name: Build and push Docker image
