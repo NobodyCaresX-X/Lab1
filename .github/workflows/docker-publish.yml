@@ -50,11 +50,21 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
+      # 提取 Docker 元数据（自动处理小写转换）
+      - name: Extract metadata for Docker
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: ghcr.io/${{ github.repository }}
+          tags: |
+            type=raw,value=latest
+
       # 构建并推送
       - name: Build and push Docker image
         uses: docker/build-push-action@v5
         with:
           context: .
           push: true
-          # 注意：镜像名称必须全部小写
-          tags: ghcr.io/${{ github.repository_owner }}/ci-cd-practice:latest
+          # 使用 metadata action 生成的标签（自动转换为小写）
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
